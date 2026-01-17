@@ -1,0 +1,50 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+</head>
+<body>
+  <video controls="" autoplay="" name="media">
+    <source src="file:///C:/Users/ConnorM/Documents/Projects/TrimLoop/test/test.mp4" type="video/mp4">
+  </video>
+  <button id="startLoop">Start Loop: </button>
+  <script>
+    let a = 2;
+    let b = 5;
+    let loopId = -1;
+
+    const startLoopButton = document.getElementById("startLoop");
+    if (!startLoopButton) throw new Error("No startLoop button found in the document.");
+    startLoopButton.addEventListener("click", () => {
+      loopVideo();
+      startLoopButton.innerText = `Loop: ${loopId}`;
+    });
+
+    function loopVideo() {
+      const video = document.querySelector('video');
+      if (!video) {
+        console.warn("No <video> elements found in the document.");
+        return;
+      }
+
+      if (loopId !== -1) {
+        console.info("Already looping, cancelling previous loop.")
+        video.cancelVideoFrameCallback(loopId);
+        loopId = -1;
+      }
+
+      console.info(`Looping from ${a} to ${b}`);
+      video.currentTime = a; 
+      video.play();
+
+      function loopAB(now, metadata) {
+        if (metadata.mediaTime >= b) {
+          video.currentTime = a;
+        }
+        loopId = video.requestVideoFrameCallback(loopAB);
+      }
+      
+      loopId = video.requestVideoFrameCallback(loopAB);
+    }
+  </script>
+</body>
+</html>
