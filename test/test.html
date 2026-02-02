@@ -5,21 +5,20 @@
 <body style="background-color: grey;">
   <section style="width: 100%; max-height: 80vh; display: grid; grid-template-columns: 1fr 1fr; ">
     <video controls="" autoplay="" name="media" style="object-fit: contain; width: 100%; height: 80vh; justify-self: center; align-self: center; background-color: black;">
-      <source src="file:///C:/Users/ConnorM/Documents/Projects/TrimLoop/test/test.mp4" type="video/mp4">
+      <source src="./test.mp4" type="video/mp4">
     </video>
     <div style="width: 100%; height: 80vh; ; display: flex; justify-content: center; align-items: center;">
-      <iframe src="../popup.html" sandbox="allow-scripts allow-same-origin" style="min-height: 40vh; border: 10px solid black;"></iframe>
+      <iframe src="../popup.html" sandbox="allow-scripts allow-same-origin" style="min-height: 40vh; min-width: 40vw; border: 10px solid black;"></iframe>
     </div>
   </section>
   <section style="width: 100%; height: 20%; border: 10px solid black;">
     <pre style="width: 100%; height: 20vh;"></pre>
   </section>
   <script>
-    // bypass for testing
     chrome.runtime = {
       onMessage: {
         addListener: (func) => {
-          window.addEventListener("message", (event) => func(event.data, null, null));
+          window.addEventListener("message", (event) => func(event.data, null, function sendResponse(response) { event.source.postMessage(response, "*"); }));
         }
       }
     };
@@ -33,7 +32,7 @@
 
       const startTime = Date.now();
       while (Date.now() - startTime < timeout) {
-          if (vid.readyState && vid.readyState >= 3) 
+          if (vid.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) 
               return vid;
           
           await new Promise(resolve => setTimeout(resolve, 500)); // sleep 500ms
@@ -41,8 +40,8 @@
       throw new Error("Video load timed out.");
     })();
     video.muted = true; // abide chrome's Autoplay Policy
-    function startLoop(start, end) { window.postMessage({ action: "START_LOOP", start, end }, '*') }
-    function stopLoop() { window.postMessage({ action: "STOP_LOOP"}, '*') }
+    function startLoop(start, end) { window.postMessage({ action: "START_LOOP", lb: { start, end } }, '*'); }
+    function stopLoop() { window.postMessage({ action: "STOP_LOOP"}, '*'); }
     const display = document.querySelector('pre');
     if (!display) throw new Error("No display found in the document.");
     function displayAppendLine(line) { display.innerText += "\n" + line; }
@@ -65,7 +64,7 @@
       displayAppendLine(`Running test: ${testToText(test)}`);
       test.action();
       await new Promise(resolve => setTimeout(resolve, test.duration * 1000));
-      if (!test.check()) fail(`Test failed! t:${video.currentTime} l:${video.loop} d:${test.duration}}`);
+      if (!test.check()) fail(`Test failed! t:${video.currentTime} d:${test.duration}}`);
     }
     displayAppendLine("All tests passed!");
   </script>

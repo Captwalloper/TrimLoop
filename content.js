@@ -1,17 +1,36 @@
 /** @type {number | null} */
 let loopId = null;
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => handleRequest(request));
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => handleRequest(request, sendResponse));
 
-/** @arg {{action: string} & Object<string, any>} request */
-function handleRequest(request) {
+/** @arg {{action: string} & Object<string, any>} request @arg {CallableFunction} sendResponse */
+function handleRequest(request, sendResponse) {
   switch (request.action) {
     case "START_LOOP":
-      startPreciseLoop(request.start, request.end);
+      startPreciseLoop(request.lb.start, request.lb.end);
       break;
     case "STOP_LOOP":
       stopPreciseLoop();
       break;
+    case "UPDATE_LOOP_BOUND":
+      const boundSide = Object.keys(request.lb)[0]; // TODO fix: assumes 1 key, but sometimes there's set
+      if (request.set) {
+        const video = document.querySelector('video');
+        if (!video) {
+          console.error("No <video> elements found in the document.");
+          return;
+        }
+        request.lb[boundSide] = video.currentTime;
+      } 
+      sendResponse({ bound: request.lb[boundSide] });
+      break;
+    case "CHECK_DURATION":
+      const video = document.querySelector('video');
+      if (!video) {
+        console.error("No <video> elements found in the document.");
+        return;
+      }
+      sendResponse({ duration: video.duration });
     default:
       console.log(`Unknown action: ${request.action}`);
       break;
@@ -37,10 +56,11 @@ function startPreciseLoop(start, end) {
   video.play();
 
   const loop = (now, metadata) => {
-    if (metadata.mediaTime >= end) {
+    if (video.currentTime >= end) {
       video.currentTime = start;
     }
     loopId = video.requestVideoFrameCallback(loop);
+    if (video.paused) video.play(); // chrome pauses when reaching duration; force play
   };
   loopId = video.requestVideoFrameCallback(loop);
 }
@@ -54,3 +74,5 @@ function stopPreciseLoop() {
     console.debug("Loop cancelled.");
   }
 }
+
+

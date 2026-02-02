@@ -46,3 +46,16 @@ Mock up a UI for a chrome extension that allows users to loop a video from user 
 The UI should be simple, sleek, and blend in with night mode.
 LOL, so AI did... pretty meh. It did inspire me to do better tho. I came up with a very simple basic layout.
 Now, I gotta make the individual components. First is a button with an "Icon". Something very simple, svg or css.
+
+So I played around with AI agents some more, and discovered LM Studio. Very nice...
+Getting better at using the agents. 50k tokens seems to be plenty for this codebase.
+I can now sent data to/from content<->popup. But I need to fix testing and I need to tidy it up.
+Also, I need to cache in session storage...
+
+I need to braindump...
+So a few changes:
+Popup.js should store the Loop Bound. Content.js can store the loopId; that's a trivial detail that's best encapsulated.
+I need a reset button, perhaps below the loop button.
+End should default to video end.
+I need to cleanup the code more...
+Also, I need a break!

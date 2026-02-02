@@ -2,17 +2,28 @@
 <html>
 <header>
   <style>
-    
+    section {
+      display: flex;
+      flex: 1;
+    }
+    loop-bound-side {
+      flex: 2;
+    }
+    loop-button {
+      flex: 1;
+    }
   </style>
+  <script src="loop-button.js"></script>
+  <script src="loop-bound-side.js"></script>
 </header>
 <body style="width: 200px; padding: 10px;">
-  <h3>TrimLoop</h3>
-  <input type="number" id="start" placeholder="Start (sec)" value="0">
-  <input type="number" id="end" placeholder="End (sec)" value="1">
-  <hr>
-  <button id="startBtn">Start Loop</button>
-  <button id="stopBtn">Stop</button>
-
+  <h2>TrimLoop</h2>
+  <section>
+    <loop-bound-side id="lba"></loop-bound-side>
+    <loop-button id="loop-btn"></loop-button>
+    <loop-bound-side id="lbb"></loop-bound-side>
+  </section>
+  <button id="reset-btn">RESET</button>
   <script src="popup.js"></script>
 </body>
 </html>
