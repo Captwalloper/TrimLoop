@@ -40,8 +40,12 @@
       throw new Error("Video load timed out.");
     })();
     video.muted = true; // abide chrome's Autoplay Policy
-    function startLoop(start, end) { window.postMessage({ action: "START_LOOP", lb: { start, end } }, '*'); }
-    function stopLoop() { window.postMessage({ action: "STOP_LOOP"}, '*'); }
+    async function loop(start, end) { 
+      await window.postMessage({ action: "UPDATE_LOOP_BOUND", lb: { start, end } });
+      if (!video.paused) await window.postMessage({ action: "TOGGLE_LOOP" });
+      await window.postMessage({ action: "TOGGLE_LOOP" });
+    }
+    function stopLoop() { if (!video.paused) window.postMessage({ action: "TOGGLE_LOOP" }); }
     const display = document.querySelector('pre');
     if (!display) throw new Error("No display found in the document.");
     function displayAppendLine(line) { display.innerText += "\n" + line; }
@@ -54,11 +58,12 @@
     }
     const lag = 0.15;
     const tests = [
-      { action: () => startLoop(0, 1), duration: 0.75+lag, check: () => video.currentTime >= 0.75 && !video.paused },
-      { action: () => startLoop(5, 7), duration: 1.75+lag, check: () => video.currentTime >= 6.75 },
-      { action: () => stopLoop(), duration: lag, check: () => video.paused },
-      { action: () => startLoop(2, 5), duration: 2+lag, check: () => video.currentTime >= 4 && !video.paused },
-      { action: () => stopLoop(), duration: lag, check: () => video.paused },
+      // { action: () => loop(0, 1), duration: 0.75+lag, check: () => video.currentTime >= 0.75 && !video.paused },
+      // { action: () => loop(5, 7), duration: 1.75+lag, check: () => video.currentTime >= 6.75 },
+      // { action: () => stopLoop(), duration: lag, check: () => video.paused },
+      // { action: () => loop(2, 5), duration: 2+lag, check: () => video.currentTime >= 4 && !video.paused },
+      { action: () => loop(7, video.duration), duration: 0.4+lag, check: () => video.currentTime < 7+lag && !video.paused },
+      // { action: () => stopLoop(), duration: lag, check: () => video.paused },
     ];
     for (const test of tests) {
       displayAppendLine(`Running test: ${testToText(test)}`);

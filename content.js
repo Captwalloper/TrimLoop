@@ -1,28 +1,32 @@
 /** @type {number | null} */
 let loopId = null;
+let lb = { start: 0, end: 0, duration: 0 };
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => handleRequest(request, sendResponse));
 
 /** @arg {{action: string} & Object<string, any>} request @arg {CallableFunction} sendResponse */
 function handleRequest(request, sendResponse) {
   switch (request.action) {
-    case "START_LOOP":
-      startPreciseLoop(request.lb.start, request.lb.end);
-      break;
-    case "STOP_LOOP":
-      stopPreciseLoop();
+    case "TOGGLE_LOOP":
+      function isLooping() { return loopId != null; }
+      if (!isLooping())
+        startPreciseLoop(lb.start, lb.end);
+      else 
+        stopPreciseLoop();
       break;
     case "UPDATE_LOOP_BOUND":
-      const boundSide = Object.keys(request.lb)[0]; // TODO fix: assumes 1 key, but sometimes there's set
       if (request.set) {
+        const boundSide = Object.keys(request.lb)[0];
         const video = document.querySelector('video');
         if (!video) {
           console.error("No <video> elements found in the document.");
           return;
         }
-        request.lb[boundSide] = video.currentTime;
-      } 
-      sendResponse({ bound: request.lb[boundSide] });
+        lb[boundSide] = video.currentTime;
+        sendResponse({ bound: request.lb[boundSide] });
+      } else {
+        Object.assign(lb, request.lb);
+      }
       break;
     case "CHECK_DURATION":
       const video = document.querySelector('video');
@@ -31,6 +35,7 @@ function handleRequest(request, sendResponse) {
         return;
       }
       sendResponse({ duration: video.duration });
+      break;
     default:
       console.log(`Unknown action: ${request.action}`);
       break;
