@@ -19,7 +19,8 @@ Besides them, the main project files are also stored here:
 * loop-bound.js   Defines UI custom element.
 * loop-button.js  Defines UI custom element.
 * popup.html      Popup HTML file.
-* content.js      Background script
+* content.js      Content script.
+* background.js   Background script.
 
 ## /docs
 A subfolder for documentation.

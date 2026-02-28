@@ -1,4 +1,4 @@
-class LoopButton extends HTMLElement {
+class KeyboardButton extends HTMLElement {
   constructor() {
     super();
     const shadow = this.attachShadow({ mode: 'open' });
@@ -11,18 +11,18 @@ class LoopButton extends HTMLElement {
           place-items: center; 
         }
         button {
-          width: fit-content;
-          aspect-ratio: 1 / 1;
-          border-radius: 50%;
-          margin: 2%;
+          width: auto;
+          aspect-ratio: auto;
+          border-radius: 25%;
+          margin: 1%;
           background: #1e293b;
           color: white;
           border: 1px solid rgba(255, 255, 255, 0.1);
-          box-shadow: 0 4px 0 #0f172a;
+          box-shadow: 0 2px 0 #0f172a;
           transition: all 0.1s ease;
           cursor: pointer;
 
-          &.is-active {
+          &:active {
             transform: translateY(3px);
             box-shadow: inset 4px 4px 8px #000, 
                         inset -4px -4px 8px #333;
@@ -30,27 +30,36 @@ class LoopButton extends HTMLElement {
           }
         }
         svg {
-          transition: transform 0.5s ease-in;
-          transform-origin: center;
-          width: 24px;
-          height: 24px;
+          width: 30px;
+          height: 30px;
           fill: none;
-          stroke: currentColor;
-          stroke-width: 2px;
+          stroke: #4285f4; 
+          stroke-width: 1.5px;
           stroke-linecap: round;
           stroke-linejoin: round;
+          transition: all 0.3s ease;
+          vertical-align: middle;
+
+          rect {
+            stroke-width: 2px;
+            opacity: 0.9;
+          }
+
+          path {
+            opacity: 0.7;
+          }
 
           &:hover {
-            transform: rotate(360deg);
+            stroke: #ffffff;
+            filter: drop-shadow(0 0 4px rgba(66, 133, 244, 0.6));
+            transform: translateY(-1px);
           }
         }
       </style>
-      <button>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M17 1l4 4-4 4"></path>
-          <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-          <path d="M7 23l-4-4 4-4"></path>
-          <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+      <button alt="Reset">
+        <svg viewBox="0 0 48 24" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="5" width="40" height="14" rx="4" ry="2" />
+          <path d="M12 9h4m6 0h4m6 0h4M10 12h6m4 0h6m4 0h8M14 15h20" />
         </svg>
       </button>
     `;
@@ -59,25 +68,18 @@ class LoopButton extends HTMLElement {
   connectedCallback() {
     const btn = this._getBtn();
     btn.addEventListener('click', () => {
-      const isLooping = btn.classList.toggle('is-active');
-      this.dispatchEvent(new CustomEvent('tloop', {
-        detail: { isLooping },
+      this.dispatchEvent(new CustomEvent('show-keybinds', {
         bubbles: true,
         composed: true
       }));
     });
   }
 
-  /** @arg {boolean} isActive */
-  toggle(isActive) {
-    this._getBtn().classList.toggle('is-active', isActive);
-  }
-
   _getBtn() {
     const btn = this.shadowRoot.querySelector('button');
-    if (!btn) throw new Error("Couldn't find loop button's button.");
+    if (!btn) throw new Error("Couldn't find reset button's button.");
     return btn;
   }
 }
 
-customElements.define('loop-button', LoopButton);
+customElements.define('keyboard-button', KeyboardButton);

@@ -19,8 +19,9 @@
       onMessage: {
         addListener: (func) => {
           window.addEventListener("message", (event) => func(event.data, null, function sendResponse(response) { event.source.postMessage(response, "*"); }));
-        }
-      }
+        },
+      },
+      sendMessage: (message) => {},
     };
   </script>
   <script src="../content.js"></script>
@@ -58,12 +59,12 @@
     }
     const lag = 0.15;
     const tests = [
-      // { action: () => loop(0, 1), duration: 0.75+lag, check: () => video.currentTime >= 0.75 && !video.paused },
-      // { action: () => loop(5, 7), duration: 1.75+lag, check: () => video.currentTime >= 6.75 },
-      // { action: () => stopLoop(), duration: lag, check: () => video.paused },
-      // { action: () => loop(2, 5), duration: 2+lag, check: () => video.currentTime >= 4 && !video.paused },
-      { action: () => loop(7, video.duration), duration: 0.4+lag, check: () => video.currentTime < 7+lag && !video.paused },
-      // { action: () => stopLoop(), duration: lag, check: () => video.paused },
+      { action: () => loop(0, 1), duration: 0.75+lag, check: () => video.currentTime >= 0.75 && !video.paused },
+      { action: () => loop(5, 7), duration: 1.75+lag, check: () => video.currentTime >= 6.75 },
+      { action: () => stopLoop(), duration: lag, check: () => video.paused },
+      { action: () => loop(2, 5), duration: 2+lag, check: () => video.currentTime >= 4 && !video.paused },
+      { action: () => loop(7, video.duration), duration: 0.39+lag, check: () => video.currentTime < 7+lag && !video.paused },
+      { action: () => stopLoop(), duration: lag, check: () => video.paused },
     ];
     for (const test of tests) {
       displayAppendLine(`Running test: ${testToText(test)}`);
