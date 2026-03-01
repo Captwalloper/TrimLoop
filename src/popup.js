@@ -1,3 +1,7 @@
+window.addEventListener('unload', async () => {
+  await sendRequest({ action: "SAVE" });
+});
+
 const loopBtn = /**@type {LoopButton}*/(document.getElementById('loop-btn'));
 if (!loopBtn) throw new Error("No loopBtn found in the document.");
 loopBtn.addEventListener('tloop', async (e) => {
@@ -46,6 +50,27 @@ resetBtn.addEventListener('reset', async function reset() {
 
 const insideIframe = window.self !== window.top; // TEST harness check
 if (!insideIframe) {
+  // avoid needing content script loaded in all tabs by loading per tab on demand
+  document.addEventListener('DOMContentLoaded', async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab.id) throw new Error("tabId not found.");
+
+    try {
+      const { loaded } = await sendRequest({ action: 'PING' });
+      init();
+    } catch (e) { // probably the script was injected yet...
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["src/content.js"]
+      })
+      .then(() => {
+        init();
+        console.debug("Injected content.js into tab:", tab.id);
+      })
+      .catch(err => console.error("Failed to inject content.js into tab:", tab.id, err));
+    }
+  });
+
   // Make UI buttons respond to keybinds. Because it feels satisfying.
   chrome.runtime.onMessage.addListener((/**@type {{ request: TLRequest, lb?: LoopBound, isLooping?: boolean }}*/message, sender, sendResponse) => {
     switch(message.request.action) {
@@ -71,7 +96,7 @@ if (!insideIframe) {
         break;
     }
   });
-}
+} else { setTimeout(init, 250) }
 
 function openKeybinds() {
   if (!insideIframe) chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
@@ -102,5 +127,3 @@ async function init() {
   lbb.setValue(lb.end);
   loopBtn.toggle(isLooping);
 }
-
-setTimeout(init, 100);

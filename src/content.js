@@ -1,8 +1,14 @@
-let loopId = /**@type {number | null}*/(null);
-let lb = { start: 0, end: 0 };
-function isLooping() { return loopId != null; }
-
 (async function main() {
+  const storageKey = 'trimLoopContentsData';
+  let { loopId, lb } = await (async function load() {
+    const stored = /**@type {Partial<ContentData>}*/(await chrome.storage.local.get(storageKey));
+    if (typeof stored.loopId === 'number' && stored.lb?.start) {
+      return { loopId: stored.loopId, lb: stored.lb };
+    }
+    return { loopId: null, lb: { start: 0, end: 0 } };
+  })();
+  function isLooping() { return loopId != null; }
+  
   const video = await (async function ensureVideoReady(timeoutMs = 10000) {
     const vid = document.querySelector('video');
     if (!vid) {
@@ -40,6 +46,11 @@ function isLooping() { return loopId != null; }
         return rsp;
       case "CHECK_LOOP_BOUND":
         return { lb, isLooping: isLooping() };
+      case "PING":
+        return { isloaded: true };
+      case "SAVE":
+        chrome.storage.local.set({ [storageKey]: /**@type {ContentData}*/{ lb, loopId } });
+        return null;
       default:
         if (Object.hasOwn(request, 'action'))
           console.log(`Unknown action: ${JSON.stringify(request)}`);

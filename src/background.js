@@ -27,3 +27,4 @@ function sendMessage(request) {
     chrome.tabs.sendMessage(tabId, request);
   });
 }
+

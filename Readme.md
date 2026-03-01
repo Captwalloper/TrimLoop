@@ -23,6 +23,14 @@ TODO
 
 - Open `test.html` in chrome
 
+### Webstore
+
+* `https://chrome.google.com/webstore/devconsole`
+* Create Zip with:
+  * icons
+  * manifest
+  * contents of src
+
 ### Tech Stack
 
 - **Language:** ES Latest (ES6+)
