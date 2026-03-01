@@ -1,12 +1,13 @@
 {
+  "$schema": "https://json.schemastore.org/chrome-manifest",
   "manifest_version": 3,
   "name": "TrimLoop",
   "version": "1.0",
   "description": "Loop a section of any video.",
   "permissions": ["activeTab", "scripting"],
   "action": {
-    "default_popup": "popup.html",
-    "default_icon": "icons/icon.png"
+    "default_popup": "src/popup.html",
+    "default_icon": { "16": "icons/icon.png" }
   },
   "icons": {
     "48": "icons/icon-48.png",
@@ -15,11 +16,11 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["src/content.js"]
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.js"
   },
   "commands": {
     "set-start": {

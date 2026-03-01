@@ -27,6 +27,7 @@ I'd have to add:
 2. a way to download a test instance of chrome (and keep it up to date)
 3. playwright or similar
 4. taskrunner
+
 I was considering doing that for learning purposes, but the proportion of time I'd spend on fluff that would NEVER be sturdy is noise.
 To maximize signal, I need to figure out a good manual-ish test.
 Maybe a test.html that loops tests and relies on visual confirmation? (with a info popup button?)
@@ -34,7 +35,7 @@ So I can use a test.html file for this. Plan is:
 1. Embed a video of test.mp4 on the left half of the page
 2. Embed an iframe of the extension popup on the right half of the page
 3. On the bottom 20% of the page, show the running test and all of its logs. Need both running test and suite status.
-4. Include a link to open a test doc on the test.html page. 
+4. Include a link to open a test doc on the test.html page.
 
 So after fighting to center elements, because html/css, and then bumping HARD against iframe sandboxing, I finally finished test.html.
 Except the visuals, I'm happy with the result. Last thing is to add a url for test.md. And also to write test.md...
@@ -59,3 +60,9 @@ I need a reset button, perhaps below the loop button.
 End should default to video end.
 I need to cleanup the code more...
 Also, I need a break!
+
+So I just grinded out the rest of the app, mainly UI/UX polish.
+I've been obsessed with GabeN's quote concerning Valve's definition of fun.
+If the system doesn't react when you act, your ego is bruised. So buttons always indent now. Even from hotkeys.
+Just gotta cleanup the project, write documentation, prep the storepage, and publish.
+User feedback can be tomorrow.

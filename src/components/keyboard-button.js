@@ -1,8 +1,8 @@
-class KeyboardButton extends HTMLElement {
+class KeyboardButton extends TrimLoopButton {
   constructor() {
     super();
     const shadow = this.attachShadow({ mode: 'open' });
-    
+    if (!this.shadowRoot) throw new Error("No shadow root found in the component... somehow...");
     this.shadowRoot.innerHTML = html`
       <style>
         :host { 
@@ -21,13 +21,6 @@ class KeyboardButton extends HTMLElement {
           box-shadow: 0 2px 0 #0f172a;
           transition: all 0.1s ease;
           cursor: pointer;
-
-          &:active {
-            transform: translateY(3px);
-            box-shadow: inset 4px 4px 8px #000, 
-                        inset -4px -4px 8px #333;
-            border-color: #3b82f6;
-          }
         }
         svg {
           width: 30px;
@@ -64,21 +57,13 @@ class KeyboardButton extends HTMLElement {
       </button>
     `;
   }
-  
-  connectedCallback() {
-    const btn = this._getBtn();
-    btn.addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('show-keybinds', {
-        bubbles: true,
-        composed: true
-      }));
-    });
-  }
 
-  _getBtn() {
-    const btn = this.shadowRoot.querySelector('button');
-    if (!btn) throw new Error("Couldn't find reset button's button.");
-    return btn;
+  onBtnClick() {
+    this.visuallyActivateBtn();
+    this.dispatchEvent(new CustomEvent('show-keybinds', {
+      bubbles: true,
+      composed: true
+    }));
   }
 }
 

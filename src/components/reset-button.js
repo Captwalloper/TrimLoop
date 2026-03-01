@@ -1,8 +1,8 @@
-class ResetButton extends HTMLElement {
+class ResetButton extends TrimLoopButton {
   constructor() {
     super();
-    const shadow = this.attachShadow({ mode: 'open' });
-    
+    this.attachShadow({ mode: 'open' });
+    if (!this.shadowRoot) throw new Error("No shadow root found in the component... somehow...");
     this.shadowRoot.innerHTML = html`
       <style>
         :host { 
@@ -21,20 +21,6 @@ class ResetButton extends HTMLElement {
           box-shadow: 0 2px 0 #0f172a;
           transition: all 0.1s ease;
           cursor: pointer;
-
-          &.is-active {
-            transform: translateY(3px);
-            box-shadow: inset 4px 4px 8px #000, 
-                        inset -4px -4px 8px #333;
-            border-color: #3b82f6;
-          }
-
-          &:active {
-            transform: translateY(3px);
-            box-shadow: inset 4px 4px 8px #000, 
-                        inset -4px -4px 8px #333;
-            border-color: #3b82f6;
-          }
         }
         svg {
           width: 24px;
@@ -53,26 +39,13 @@ class ResetButton extends HTMLElement {
       </button>
     `;
   }
-  
-  connectedCallback() {
-    const btn = this._getBtn();
-    btn.addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('reset', {
-        bubbles: true,
-        composed: true
-      }));
-    });
-  }
 
-  simulateActive() {
-    this._getBtn().classList.toggle('is-active', true);
-    setTimeout(() => {this._getBtn().classList.toggle('is-active', false)}, 200);
-  }
-
-  _getBtn() {
-    const btn = this.shadowRoot.querySelector('button');
-    if (!btn) throw new Error("Couldn't find reset button's button.");
-    return btn;
+  onBtnClick() {
+    this.visuallyActivateBtn();
+    this.dispatchEvent(new CustomEvent('reset', {
+      bubbles: true,
+      composed: true
+    }));
   }
 }
 

@@ -22,17 +22,17 @@ function isLooping() { return loopId != null; }
 
   lb.end = video.duration;
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => handleRequest(request, sendResponse));
-
-  /** @arg {{action: string, lb?: {start?: number, end?: number}, set?: boolean, reset?: boolean}} request @arg {CallableFunction} sendResponse */
+  
+  /** @arg {TLRequest} request @arg {CallableFunction} sendResponse */
   function handleRequest(request, sendResponse) {
     const response = (() => { switch (request.action) {
       case "TOGGLE_LOOP":
-        chrome.runtime.sendMessage(toggleLoop());
+        chrome.runtime.sendMessage({ request, ...toggleLoop()});
         return null;
       case "UPDATE_LOOP_BOUND":
-        const response = updateLoopBound(request);
-        chrome.runtime.sendMessage({ lb, rlb: request.lb, set: request.set, reset: request.reset });
-        return response;
+        const rsp = updateLoopBound(/**@type {UpdateLoopBoundDetails}*/(request.details));
+        chrome.runtime.sendMessage({ request, lb }); // TODO
+        return rsp;
       case "CHECK_LOOP_BOUND":
         return { lb, isLooping: isLooping() };
       default:
@@ -53,16 +53,20 @@ function isLooping() { return loopId != null; }
     return { isLooping: !looping };
   }
 
-  /*** @arg {{action: string, lb?: {start?: number, end?: number}, set?: boolean, reset?: boolean}} request */
-  function updateLoopBound(request) {
-    if (request.set && request.lb) {
-      if (request.lb.start >= 0) lb.start = video.currentTime;
-      else lb.end = video.currentTime;
-    } else if (request.reset) {
-      lb.start = 0;
-      lb.end = video.duration;
-    } else {
-      Object.assign(lb, request.lb);
+  /** @arg {UpdateLoopBoundDetails} details */
+  function updateLoopBound(details) {
+    switch(details.mode) {
+      case "set":
+        Object.assign(lb, details.lb);
+        break;
+      case "reset":
+        lb.start = 0;
+        lb.end = video.duration;
+        break;
+      case "pin":
+        if ((details.lb?.start ?? 0) < 0) lb.start = video.currentTime;
+        if ((details.lb?.end ?? 0) < 0) lb.end = video.currentTime;
+        break;
     }
     return { lb };
   }
@@ -79,12 +83,12 @@ function isLooping() { return loopId != null; }
     video.play();
 
     const effectiveEnd = Math.min(end, video.duration - 0.12);
-    const loop = (now, metadata) => {
+    const loop = /**@type {VideoFrameRequestCallback}*/((now, metadata) => {
       if (metadata.mediaTime  >= effectiveEnd) {
         video.currentTime = start;
       }
       loopId = video.requestVideoFrameCallback(loop);
-    };
+    });
     loopId = video.requestVideoFrameCallback(loop);
   }
 

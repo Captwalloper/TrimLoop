@@ -8,7 +8,7 @@
       <source src="./test.mp4" type="video/mp4">
     </video>
     <div style="width: 100%; height: 80vh; ; display: flex; justify-content: center; align-items: center;">
-      <iframe src="../popup.html" sandbox="allow-scripts allow-same-origin" style="min-height: 40vh; min-width: 40vw; border: 10px solid black;"></iframe>
+      <iframe src="../src/popup.html" sandbox="allow-scripts allow-same-origin" style="min-height: 40vh; min-width: 40vw; border: 10px solid black;"></iframe>
     </div>
   </section>
   <section style="width: 100%; height: 20%; border: 10px solid black;">
@@ -24,7 +24,7 @@
       sendMessage: (message) => {},
     };
   </script>
-  <script src="../content.js"></script>
+  <script src="../src/content.js"></script>
   <script type="module">
     /** @type {HTMLVideoElement} */
     const video = await (async function ensureVideoReady(timeout = 10000) {
@@ -42,7 +42,7 @@
     })();
     video.muted = true; // abide chrome's Autoplay Policy
     async function loop(start, end) { 
-      await window.postMessage({ action: "UPDATE_LOOP_BOUND", lb: { start, end } });
+      await window.postMessage({ action: "UPDATE_LOOP_BOUND", details: { mode: 'set', lb: { start, end } } });
       if (!video.paused) await window.postMessage({ action: "TOGGLE_LOOP" });
       await window.postMessage({ action: "TOGGLE_LOOP" });
     }
