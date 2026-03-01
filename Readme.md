@@ -19,6 +19,10 @@ TODO
 5. Click **Load unpacked**.
 6. Select the `TrimLoop` folder.
 
+### Testing
+
+- Open `test.html` in chrome
+
 ### Tech Stack
 
 - **Language:** ES Latest (ES6+)

@@ -3,27 +3,19 @@
 <header>
   <style>
     body {
-      width: 250px; 
-      padding: 5px;
+      /*Chrome web extension restrictions*/
+      max-width: 800px;
+      max-height: 600px; 
 
-      /* A deep, desaturated blue-grey with 75% opacity */
+      min-width: 250px;
+      padding: 5px;
       background: rgba(15, 23, 42, 0.75); 
-      
-      /* The "Glass" magic: blurs whatever is behind the popup */
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px); /* For Chrome compatibility */
-      
-      /* A very thin, subtle white border to define the edges */
       border: 1px solid rgba(255, 255, 255, 0.1);
-      
-      /* Soft outer glow to separate it from the webpage */
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-      
-      /* Rounded corners feel more modern/premium */
       border-radius: 12px;
-      
-      /* Padding and sizing */
-      color: #e2e8f0; /* Light grey text for better readability on dark glass */
+      color: #e2e8f0;
     }
     section:first-of-type {
       display: flex;

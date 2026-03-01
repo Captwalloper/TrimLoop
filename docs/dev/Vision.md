@@ -14,3 +14,15 @@
 --strongly considering
 
 * probably keybinds, maybe mappable
+
+-------------------------------------------------------------------------------------------
+
+## Reflection
+
+So, I decided against the extension icon showing status because it's tab focused not browser wide.
+Other than that, the initial vision was achieved.
+
+### Future Stuff
+
+* Import/export trim settings, probably as url params
+* Support multiple, discontinuous segments

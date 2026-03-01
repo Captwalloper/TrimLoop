@@ -1,12 +1,16 @@
-/** @type {number | null} */
-let loopId = null;
+let loopId = /**@type {number | null}*/(null);
 let lb = { start: 0, end: 0 };
 function isLooping() { return loopId != null; }
 
 (async function main() {
   const video = await (async function ensureVideoReady(timeoutMs = 10000) {
     const vid = document.querySelector('video');
-    if (!vid) throw new Error("No video found in the document.");
+    if (!vid) {
+      console.debug("No video found in the document.");
+      const nullVid = document.createElement('video');
+      nullVid.title = "Intellisense wouldn't let me return null here...";
+      return nullVid;
+    }
 
     const startTime = Date.now();
     while (Date.now() - startTime < timeoutMs) {
@@ -19,6 +23,7 @@ function isLooping() { return loopId != null; }
     }
     throw new Error("Video load timed out.");
   })();
+  if (video.title === "Intellisense wouldn't let me return null here...") return;
 
   lb.end = video.duration;
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => handleRequest(request, sendResponse));
@@ -31,7 +36,7 @@ function isLooping() { return loopId != null; }
         return null;
       case "UPDATE_LOOP_BOUND":
         const rsp = updateLoopBound(/**@type {UpdateLoopBoundDetails}*/(request.details));
-        chrome.runtime.sendMessage({ request, lb }); // TODO
+        chrome.runtime.sendMessage({ request, lb });
         return rsp;
       case "CHECK_LOOP_BOUND":
         return { lb, isLooping: isLooping() };
@@ -64,8 +69,8 @@ function isLooping() { return loopId != null; }
         lb.end = video.duration;
         break;
       case "pin":
-        if ((details.lb?.start ?? 0) < 0) lb.start = video.currentTime;
-        if ((details.lb?.end ?? 0) < 0) lb.end = video.currentTime;
+        if (typeof details.lb?.start === 'number') lb.start = video.currentTime;
+        if (typeof details.lb?.end === 'number') lb.end = video.currentTime;
         break;
     }
     return { lb };
@@ -93,8 +98,7 @@ function isLooping() { return loopId != null; }
   }
 
   function stopPreciseLoop() {
-    const video = document.querySelector('video');
-    if (video !== null && loopId !== null) {
+    if (loopId !== null) {
       video.cancelVideoFrameCallback(loopId);
       loopId = null;
       video.pause();

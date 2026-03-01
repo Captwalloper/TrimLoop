@@ -5,8 +5,10 @@ interface TLRequest {
 
 interface UpdateLoopBoundDetails {
   mode: 'pin' | 'set' | 'reset';
-  lb?: {
-      start?: number;
-      end?: number;
-  };
+  lb?: LoopBound;
+}
+
+interface LoopBound {
+    start?: number;
+    end?: number;
 }

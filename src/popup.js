@@ -1,7 +1,7 @@
 const loopBtn = /**@type {LoopButton}*/(document.getElementById('loop-btn'));
 if (!loopBtn) throw new Error("No loopBtn found in the document.");
 loopBtn.addEventListener('tloop', async (e) => {
-  await await sendRequest({ action: "TOGGLE_LOOP" });
+  await sendRequest({ action: "TOGGLE_LOOP" });
 });
 
 const keyboardBtn = /**@type {KeyboardButton}*/(document.getElementById('keyboard-btn'));
@@ -19,8 +19,8 @@ lba.addEventListener('bound-set', async (e) => {
     mode: start >= 0 ? 'set' : 'pin',
     lb: { start }
   };
-  const response = await await sendRequest({ action: "UPDATE_LOOP_BOUND", details });
-  lba.setValue(response.lb.start);
+  const response = await sendRequest({ action: "UPDATE_LOOP_BOUND", details });
+  if (details.mode === 'pin') lba.setValue(response.lb.start);
 });
 
 const lbb = /**@type {LoopBoundSide}*/(document.getElementById('lbb'));
@@ -33,7 +33,7 @@ lbb.addEventListener('bound-set', async (e) => {
     lb: { end }
   };
   const response = await sendRequest({ action: "UPDATE_LOOP_BOUND", details });
-  lbb.setValue(response.lb.end);
+  if (details.mode === 'pin') lbb.setValue(response.lb.end);
 });
 
 const resetBtn = /**@type {ResetButton}*/(document.getElementById('reset-btn'));
@@ -44,18 +44,28 @@ resetBtn.addEventListener('reset', async function reset() {
   lbb.setValue(lb.end);
 });
 
-const insideIframe = window.self !== window.top;
+const insideIframe = window.self !== window.top; // TEST harness check
 if (!insideIframe) {
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Make UI buttons respond to keybinds. Because it feels satisfying.
+  chrome.runtime.onMessage.addListener((/**@type {{ request: TLRequest, lb?: LoopBound, isLooping?: boolean }}*/message, sender, sendResponse) => {
     switch(message.request.action) {
       case 'TOGGLE_LOOP':
-        loopBtn.toggle(message.isLooping);
+        if (typeof message?.isLooping === 'boolean') loopBtn.toggle(message.isLooping);
         break;
       case 'UPDATE_LOOP_BOUND':
-        if (message.request.details.mode === 'pin') {
-          if (message.request.details.lb.start >= 0) lba.setValue(message.lb.start);
-          if (message.request.details.lb.end >= 0) lba.setValue(message.lb.end);
-        } else if (message.request.details.mode === 'reset') {
+        const { mode, lb: rlb } = /**@type {UpdateLoopBoundDetails}*/(message.request.details);
+        const { lb } = message;
+        if (typeof rlb?.start === 'number' && typeof lb?.start === 'number') {
+          if (mode === 'pin') lba.visuallyActivateBtn();
+          lba.setValue(lb.start);
+        }
+        if (typeof rlb?.end === 'number' && typeof lb?.end === 'number') {
+          if (mode === 'pin') lbb.visuallyActivateBtn();
+          lbb.setValue(lb.end);
+        }
+        if (mode === 'reset' && typeof lb?.end === 'number') {
+          lba.setValue(0);
+          lbb.setValue(lb.end);
           resetBtn.visuallyActivateBtn();
         }
         break;
@@ -70,7 +80,7 @@ function openKeybinds() {
 
 /** @arg {TLRequest} request */
 async function sendRequest(request) {
-  if (insideIframe) { //TEST
+  if (insideIframe) {
     return await new Promise((resolve, reject) => {
       window.addEventListener('message', function handleEvent(event) {
         resolve(event.data);
