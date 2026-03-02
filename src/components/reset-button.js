@@ -21,6 +21,10 @@ class ResetButton extends TrimLoopButton {
           box-shadow: 0 2px 0 #0f172a;
           transition: all 0.1s ease;
           cursor: pointer;
+
+          &:hover {
+            transform: rotate(-45deg);
+          }
         }
         svg {
           width: 24px;

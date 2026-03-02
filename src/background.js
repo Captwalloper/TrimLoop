@@ -22,7 +22,7 @@ chrome.commands.onCommand.addListener((command) => {
 /** @arg {TLRequest} request*/
 function sendMessage(request) {
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    const tabId = tabs.find(x => true)?.id;
+    const tabId = tabs.find(x => true)?.id; // grab first
     if (!tabId) throw new Error('Unable to determine tabId.');
     chrome.tabs.sendMessage(tabId, request);
   });

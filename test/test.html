@@ -12,7 +12,8 @@
     </div>
   </section>
   <section style="width: 100%; height: 20%; border: 10px solid black;">
-    <pre style="width: 100%; height: 20vh;"></pre>
+    <a href="./notes.md" target="_blank" rel="noopener noreferrer">Test Notes</a>
+    <pre style="width: 100%; height: 19vh;"></pre>
   </section>
   <script>
     chrome.storage = {
@@ -78,6 +79,7 @@
       if (!test.check()) fail(`Test failed! t:${video.currentTime} d:${test.duration}}`);
     }
     displayAppendLine("All tests passed!");
+    displayAppendLine("Note: also check for keybind errors. You should expect one for each (4), since the chrome api won't work in an iframe.");
   </script>
 </body>
 </html>

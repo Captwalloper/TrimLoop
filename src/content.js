@@ -1,11 +1,8 @@
 (async function main() {
   const storageKey = 'trimLoopContentsData';
   let { loopId, lb } = await (async function load() {
-    const stored = /**@type {Partial<ContentData>}*/(await chrome.storage.local.get(storageKey));
-    if (typeof stored.loopId === 'number' && stored.lb?.start) {
-      return { loopId: stored.loopId, lb: stored.lb };
-    }
-    return { loopId: null, lb: { start: 0, end: 0 } };
+    const stored = /**@type {ContentData | undefined}}*/((await chrome.storage.local.get(storageKey))[storageKey]);
+    return stored ? stored : { loopId: null, lb: { start: 0, end: 0 } };
   })();
   function isLooping() { return loopId != null; }
   
@@ -32,17 +29,25 @@
   if (video.title === "Intellisense wouldn't let me return null here...") return;
 
   lb.end = video.duration;
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => handleRequest(request, sendResponse));
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    handleRequest(request, sendResponse)
+    .catch(e => console.debug(`${e}`)); // Perhaps the popup was closed. 
+    return true;
+  });
   
   /** @arg {TLRequest} request @arg {CallableFunction} sendResponse */
-  function handleRequest(request, sendResponse) {
-    const response = (() => { switch (request.action) {
+  async function handleRequest(request, sendResponse) {
+
+    function respondToPopupOrKeybind(/**@type {{ [key: string]: any }}*/message) { sendResponse(message); }
+    async function promptPopupToRespond(/**@type {PromptPopup}*/message) { await chrome.runtime.sendMessage(message); } 
+
+    const response = await (async () => { switch (request.action) {
       case "TOGGLE_LOOP":
-        chrome.runtime.sendMessage({ request, ...toggleLoop()});
-        return null;
+        await promptPopupToRespond({ request, ...toggleLoop()});
+        return {};
       case "UPDATE_LOOP_BOUND":
         const rsp = updateLoopBound(/**@type {UpdateLoopBoundDetails}*/(request.details));
-        chrome.runtime.sendMessage({ request, lb });
+        await promptPopupToRespond({ request, lb });
         return rsp;
       case "CHECK_LOOP_BOUND":
         return { lb, isLooping: isLooping() };
@@ -50,13 +55,13 @@
         return { isloaded: true };
       case "SAVE":
         chrome.storage.local.set({ [storageKey]: /**@type {ContentData}*/{ lb, loopId } });
-        return null;
+        return {};
       default:
         if (Object.hasOwn(request, 'action'))
           console.log(`Unknown action: ${JSON.stringify(request)}`);
-        return null;
+        return {};
     }})();
-    if (response) sendResponse(response);
+    respondToPopupOrKeybind(response);
   }
 
   function toggleLoop() {
@@ -89,8 +94,17 @@
 
   /** @arg {number} start @arg {number} end */
   function startPreciseLoop(start, end) {
-    if (start > end) {
+    if (start < 0) {
+      console.error("Start must be a positive number!");
+      return;
+    } else if (start > end) {
       console.error("Start must come earlier than end!");
+      return;
+    } else if (start > video.duration) {
+      console.error("Start must be less than video duration.");
+      return;
+    } else if (end > video.duration) {
+      console.error("End must be less than video duration.");
       return;
     }
 

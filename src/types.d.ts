@@ -21,3 +21,9 @@ interface ContentData {
     lb: Required<LoopBound>;
     loopId: number | null;
 }
+
+interface PromptPopup { 
+    request: TLRequest, 
+    lb?: LoopBound, 
+    isLooping?: boolean 
+}

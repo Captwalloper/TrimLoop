@@ -50,7 +50,7 @@ resetBtn.addEventListener('reset', async function reset() {
 
 const insideIframe = window.self !== window.top; // TEST harness check
 if (!insideIframe) {
-  // avoid needing content script loaded in all tabs by loading per tab on demand
+  // Avoid needing content script loaded in all tabs by loading per tab on demand
   document.addEventListener('DOMContentLoaded', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab.id) throw new Error("tabId not found.");
@@ -58,7 +58,7 @@ if (!insideIframe) {
     try {
       const { loaded } = await sendRequest({ action: 'PING' });
       init();
-    } catch (e) { // probably the script was injected yet...
+    } catch (e) { // probably the script wasn't injected yet...
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         files: ["src/content.js"]
@@ -67,12 +67,12 @@ if (!insideIframe) {
         init();
         console.debug("Injected content.js into tab:", tab.id);
       })
-      .catch(err => console.error("Failed to inject content.js into tab:", tab.id, err));
+      .catch(err => console.error("Failed to inject content.js into tab:", tab.id, err, e));
     }
   });
 
   // Make UI buttons respond to keybinds. Because it feels satisfying.
-  chrome.runtime.onMessage.addListener((/**@type {{ request: TLRequest, lb?: LoopBound, isLooping?: boolean }}*/message, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((/**@type {PromptPopup}*/message, sender, sendResponse) => {
     switch(message.request.action) {
       case 'TOGGLE_LOOP':
         if (typeof message?.isLooping === 'boolean') loopBtn.toggle(message.isLooping);
